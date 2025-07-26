@@ -17,7 +17,7 @@ int main()
 
 	auto file = gd::parse(stream);
 
-  // Do stuff with the file here
+	// Do stuff with the file here
 
 	return 0;
 }
