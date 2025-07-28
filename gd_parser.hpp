@@ -79,7 +79,7 @@ Numeric <- Float / Integer
 
 Integer <- <'-'? Number>
 Float <- <Integer '.' Number ('e' Integer)?>
-String <- <'"' [^"]* '"'>
+String <- '"' <[^"]*> '"'
 Array <- '[' List(Value) ']'
 Dictionary <- '{' List(Property) '}'
 Constructable <- Identifier '(' List(Value) ')'
