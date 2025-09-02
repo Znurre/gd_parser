@@ -13,9 +13,8 @@ namespace gd
 
 	using dictionary_t = std::unordered_map<std::string, value>;
 	using array_t = std::vector<value>;
-	using numeric_t = std::variant<float, int>;
 
-	using value_t = havoc::one_of<constructable, dictionary_t, array_t, bool, std::string, numeric_t>;
+	using value_t = havoc::one_of<constructable, dictionary_t, array_t, bool, std::string, float>;
 
 	struct value : value_t
 	{
@@ -73,12 +72,10 @@ Assignments <- Field+
 Field <- Identifier '=' Value
 Property <- String ':' Value
 
-Value <- Constructable / Dictionary / Array / Boolean / String / Numeric
+Value <- Numeric / String / Constructable / Dictionary / Array / Boolean
 
-Numeric <- Float / Integer
-
+Numeric <- <Integer ('.' Number ('e' Integer)?)?>
 Integer <- <'-'? Number>
-Float <- <Integer '.' Number ('e' Integer)?>
 String <- '"' <[^"]*> '"'
 Array <- '[' List(Value) ']'
 Dictionary <- '{' List(Property) '}'
@@ -134,12 +131,12 @@ List(T) <- (T (',' T)*)?
 			{
 				if (auto fields = std::any_cast<detail::fields>(&values[i]))
 				{
-					tag.fields = fields->fields;
+					tag.fields = std::move(fields->fields);
 				}
 
 				if (auto assignments = std::any_cast<detail::assignments>(&values[i]))
 				{
-					tag.assignments = assignments->fields;
+					tag.assignments = std::move(assignments->fields);
 				}
 			}
 
@@ -147,15 +144,16 @@ List(T) <- (T (',' T)*)?
 		};
 
 		parser["Constructable"] = [](peg::SemanticValues values) -> gd::constructable {
-			gd::constructable constructable {
-				.identifier = std::any_cast<std::string>(values[0]),
-			};
+			std::vector<value> arguments(values.size() - 1);
 
-			std::transform(begin(values) + 1, end(values), back_inserter(constructable.arguments), [](auto value) {
+			std::transform(begin(values) + 1, end(values), begin(arguments), [](auto value) {
 				return std::any_cast<gd::value>(value);
 			});
 
-			return constructable;
+			return {
+				.identifier = std::any_cast<std::string>(values[0]),
+				.arguments = std::move(arguments),
+			};
 		};
 
 		parser["Property"] = [](peg::SemanticValues values) {
@@ -173,9 +171,9 @@ List(T) <- (T (',' T)*)?
 		};
 
 		parser["Array"] = [](peg::SemanticValues values) {
-			gd::array_t array;
+			gd::array_t array(values.size());
 
-			std::ranges::transform(values, back_inserter(array), [](auto value) {
+			std::ranges::transform(values, begin(array), [](auto value) {
 				return std::any_cast<gd::value>(value);
 			});
 
@@ -197,45 +195,29 @@ List(T) <- (T (',' T)*)?
 			return values.token_to_string();
 		};
 
-		parser["Integer"] = [](peg::SemanticValues values) {
-			return values.token_to_number<int>();
-		};
-
-		parser["Float"] = [](peg::SemanticValues values) {
-			return values.token_to_number<float>();
-		};
-
 		parser["Boolean"] = [](peg::SemanticValues values) {
 			return values.token_to_string() == "true";
 		};
 
-		parser["Numeric"] = [](peg::SemanticValues values) -> gd::numeric_t {
-			switch (values.choice())
-			{
-			case 0:
-				return std::any_cast<float>(values[0]);
-			case 1:
-				return std::any_cast<int>(values[0]);
-			default:
-				return {};
-			}
+		parser["Numeric"] = [](peg::SemanticValues values) {
+			return values.token_to_number<float>();
 		};
 
 		parser["Value"] = [](peg::SemanticValues values) -> gd::value {
 			switch (values.choice())
 			{
 			case 0:
-				return std::any_cast<gd::constructable>(values[0]);
+				return std::any_cast<float>(values[0]);
 			case 1:
-				return std::any_cast<gd::dictionary_t>(values[0]);
-			case 2:
-				return std::any_cast<gd::array_t>(values[0]);
-			case 3:
-				return std::any_cast<bool>(values[0]);
-			case 4:
 				return std::any_cast<std::string>(values[0]);
+			case 2:
+				return std::any_cast<gd::constructable>(values[0]);
+			case 3:
+				return std::any_cast<gd::dictionary_t>(values[0]);
+			case 4:
+				return std::any_cast<gd::array_t>(values[0]);
 			case 5:
-				return std::any_cast<gd::numeric_t>(values[0]);
+				return std::any_cast<bool>(values[0]);
 			default:
 				return {};
 			}
