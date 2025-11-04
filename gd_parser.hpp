@@ -74,7 +74,7 @@ Property <- String ':' Value
 
 Value <- Numeric / String / Constructable / Dictionary / Array / Boolean
 
-Numeric <- <Integer ('.' Number ('e' Integer)?)?>
+Numeric <- <Integer ('e' Integer)? ('.' Number ('e' Integer)?)?>
 Integer <- <'-'? Number>
 String <- '"' <[^"]*> '"'
 Array <- '[' List(Value) ']'
@@ -82,7 +82,7 @@ Dictionary <- '{' List(Property) '}'
 Constructable <- Identifier '(' List(Value) ')'
 
 Number <- [0-9]+
-Identifier <- <[a-zA-Z.:_0-9]+>
+Identifier <- <[a-zA-Z.:_0-9/]+>
 Boolean <- 'true' | 'false'
 
 List(T) <- (T (',' T)*)?
