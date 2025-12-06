@@ -59,7 +59,7 @@ namespace gd
 		std::vector<tag> tags;
 	};
 
-	gd::file parse(std::istream& stream)
+	inline gd::file parse(std::istream& stream)
 	{
 		constexpr auto grammar = R"(
 File <- Tag+
