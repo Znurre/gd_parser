@@ -76,7 +76,7 @@ Value <- Numeric / String / Constructable / Dictionary / Array / Boolean
 
 Numeric <- <Integer ('e' Integer)? ('.' Number ('e' Integer)?)?>
 Integer <- <'-'? Number>
-String <- '"' <[^"]*> '"'
+String <- '&'?'"' <[^"]*> '"'
 Array <- '[' List(Value) ']'
 Dictionary <- '{' List(Property) '}'
 Constructable <- Identifier '(' List(Value) ')'
