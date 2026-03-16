@@ -164,6 +164,8 @@ namespace havoc
 	{
 		using option<T...>::option;
 		using option<T...>::operator=;
+
+		using types = std::tuple<T...>;
 	};
 
 	template <typename T, typename... Ts>
@@ -226,4 +228,10 @@ namespace havoc
 
 		return {};
 	}
+
+	template <typename T>
+	static constexpr auto variant_size_v = std::tuple_size_v<typename T::types>;
+
+	template <size_t I, typename T>
+	using variant_alternative_t = std::tuple_element_t<I, typename T::types>;
 };
