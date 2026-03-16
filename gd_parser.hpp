@@ -232,7 +232,9 @@ List(T) <- (T (',' T)*)?
 
 		gd::file file;
 
-		parser.parse(stringstream.str(), file);
+		auto str = stringstream.str();
+
+		parser.parse({ begin(str), std::min(end(str), std::ranges::find(str, '\0')) }, file);
 
 		return file;
 	}
