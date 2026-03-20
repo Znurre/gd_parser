@@ -115,6 +115,12 @@ namespace havoc
 		{
 		}
 
+		option(const T& value)
+			: _storage(value)
+			, _timestamp(++_counter)
+		{
+		}
+
 		option(option<T>&& other)
 			: _storage(std::move(other._storage))
 			, _timestamp(other._timestamp)
