@@ -1,5 +1,10 @@
 # gd_parser
 
+> [!WARNING]  
+> The active development of this project has moved to https://codeberg.org/znurre/gd_parser.
+
+---
+
 Single header C++ parser for the Godot resource file format using https://github.com/Znurre/havoc and https://github.com/yhirose/cpp-peglib
 
 This library does not care about the semantics of the files, it simply parses them to an AST that can then be transformed into a more high level structure.
